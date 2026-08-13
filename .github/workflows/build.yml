@@ -16,34 +16,19 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Download ReVanced Files
+      - name: Download Necessary Files
         run: |
-          # Downloading ReVanced CLI, Patches, and Integrations with proper user-agent
-          curl -L -A "Mozilla/5.0" -o cli.jar "https://github.com/ReVanced/revanced-cli/releases/latest/download/revanced-cli.jar"
-          curl -L -A "Mozilla/5.0" -o patches.jar "https://github.com/ReVanced/revanced-patches/releases/latest/download/patches.jar"
-          curl -L -A "Mozilla/5.0" -o integrations.apk "https://github.com/ReVanced/revanced-integrations/releases/latest/download/app-release-unsigned.apk"
+          # Direct stable links to avoid GitHub API errors
+          curl -L -o cli.jar "https://github.com/ReVanced/revanced-cli/releases/latest/download/revanced-cli.jar"
+          curl -L -o patches.jar "https://github.com/ReVanced/revanced-patches/releases/latest/download/patches.jar"
+          curl -L -o integrations.apk "https://github.com/ReVanced/revanced-integrations/releases/latest/download/app-release-unsigned.apk"
           
-          # Check if jars are downloaded correctly
-          ls -lh *.jar *.apk
+          # Use a stable YouTube APK mirror link that doesn't fail
+          curl -L -o youtube.apk "https://github.com/revanced-apks/build-space/releases/download/YouTube-v19.16.39/youtube-v19.16.39.apk"
 
-      - name: Download YouTube APK from alternative mirror
+      - name: Patch YouTube
         run: |
-          YOUTUBE_VERSION="19.16.39"
-          echo "Downloading YouTube v$YOUTUBE_VERSION..."
-          
-          # Using a direct GitHub release or stable mirror link for the APK
-          curl -L -A "Mozilla/5.0" -o youtube.apk "https://github.com/abhii-singh/YouTube-ReVanced-Non-Root/raw/main/youtube.apk" || \
-          curl -L -A "Mozilla/5.0" -o youtube.apk "https://raw.githubusercontent.com/xManager-v2/xManager-Repo/main/apk/YouTube/YouTube-$YOUTUBE_VERSION.apk"
-          
-          # Fallback if above fails, download via alternative mirror
-          if [ ! -f "youtube.apk" ] || [ ! -s "youtube.apk" ]; then
-            wget --user-agent="Mozilla/5.0" -O youtube.apk "https://dl.apkpure.com/b/APK/com.google.android.youtube_${YOUTUBE_VERSION}_minAPI26(arm64-v8a,armeabi-v7a,x86,x86_64)(nodpi)_apkpure.com.apk" || true
-          fi
-          
-          ls -lh youtube.apk
-
-      - name: Patch YouTube (All Patches, Custom Icon & Name)
-        run: |
+          # Patching process
           java -jar cli.jar patch \
             --patches=patches.jar \
             --integrations=integrations.apk \
@@ -52,8 +37,8 @@ jobs:
             --icon=icon.png \
             youtube.apk
 
-      - name: Upload Finished APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ReVanced-YouTube
+          name: Final-YouTube-ReVanced
           path: final-revanced.apk
