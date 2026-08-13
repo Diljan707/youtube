@@ -1,4 +1,4 @@
-name: Build ReVanced APK
+name: Build Morphe APK
 
 on:
   workflow_dispatch:
@@ -16,29 +16,29 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Download Necessary Files
+      - name: Download Morphe CLI and YouTube
         run: |
-          # Direct stable links to avoid GitHub API errors
+          # Downloading Morphe/ReVanced compatible CLI and YouTube APK
           curl -L -o cli.jar "https://github.com/ReVanced/revanced-cli/releases/latest/download/revanced-cli.jar"
-          curl -L -o patches.jar "https://github.com/ReVanced/revanced-patches/releases/latest/download/patches.jar"
-          curl -L -o integrations.apk "https://github.com/ReVanced/revanced-integrations/releases/latest/download/app-release-unsigned.apk"
-          
-          # Use a stable YouTube APK mirror link that doesn't fail
           curl -L -o youtube.apk "https://github.com/revanced-apks/build-space/releases/download/YouTube-v19.16.39/youtube-v19.16.39.apk"
 
-      - name: Patch YouTube
+      - name: Download Morphe Patches
         run: |
-          # Patching process
+          # Downloading Morphe patches directly from their repository
+          curl -L -o patches.jar "https://github.com/Morphe-App/morphe-patches/releases/latest/download/patches.jar" || \
+          curl -L -o patches.jar "https://github.com/ReVanced/revanced-patches/releases/latest/download/patches.jar"
+
+      - name: Patch with Morphe
+        run: |
           java -jar cli.jar patch \
             --patches=patches.jar \
-            --integrations=integrations.apk \
-            --out=final-revanced.apk \
-            --app-name="ReVanced" \
+            --out=morphe-final.apk \
+            --app-name="YouTube" \
             --icon=icon.png \
             youtube.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Final-YouTube-ReVanced
-          path: final-revanced.apk
+          name: Morphe-YouTube
+          path: morphe-final.apk
